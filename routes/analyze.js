@@ -301,25 +301,23 @@ router.post("/upload", (req, res, next) => {
         }
 
         // Rewrite heatmap filenames to full URLs (ML engine serves its own outputs)
-        if (data.heatmap_url && !String(data.heatmap_url).startsWith("http")) {
-          data = { ...data, heatmap_url: `${ML_BASE}/outputs/${data.heatmap_url}` };
+        let mlData = { ...data };
+        if (mlData.heatmap_url && !String(mlData.heatmap_url).startsWith("http")) {
+          mlData.heatmap_url = `${ML_BASE}/outputs/${mlData.heatmap_url}`;
         }
-        if (Array.isArray(data.keyframe_heatmaps)) {
-          data = {
-            ...data,
-            keyframe_heatmaps: data.keyframe_heatmaps.map((h) =>
-              String(h).startsWith("http") ? h : `${ML_BASE}/outputs/${h}`
-            ),
-          };
+        if (Array.isArray(mlData.keyframe_heatmaps)) {
+          mlData.keyframe_heatmaps = mlData.keyframe_heatmaps.map((h) =>
+            String(h).startsWith("http") ? h : `${ML_BASE}/outputs/${h}`
+          );
         }
 
         // Always attach an insight (Gemini → fallback heuristic)
-        let enriched = data;
+        let enriched = mlData;
         try {
-          const insight = await buildGeminiInsight(data);
-          enriched = { ...data, insight };
+          const insight = await buildGeminiInsight(mlData);
+          enriched = { ...mlData, insight };
         } catch (e) {
-          enriched = { ...data, insight: fallbackHeuristicInsight(data) };
+          enriched = { ...mlData, insight: fallbackHeuristicInsight(mlData) };
         }
 
         return res.json(enriched);
