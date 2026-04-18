@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: admind-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: ML_BASE
+        sync: false          # set this in Render dashboard → ML engine URL
+      - key: GEMINI_API_KEY
+        sync: false          # set this in Render dashboard
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: MAX_UPLOAD_MB
+        value: "200"
+      - key: NODE_ENV
+        value: production
